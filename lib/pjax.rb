@@ -2,7 +2,7 @@ module Pjax
   extend ActiveSupport::Concern
 
   included do
-    # layout proc { |c| pjax_request? ? pjax_layout : 'application' }
+    layout proc { |c| layout_by_resource }
     helper_method :pjax_request?
 
     rescue_from Pjax::Unsupported, :with => :pjax_unsupported
@@ -15,6 +15,18 @@ module Pjax
   class Unsupported < Error; end
 
   protected
+  
+    def layout_by_resource
+      if pjax_request?
+        false
+      else
+        if (controller_name == 'registrations' && action_name == 'edit') || controller_name == 'billings' || controller_name == 'payments' || controller_name == 'subscriptions'|| controller_name == 'users' 
+          'userdashboard' 
+        else 
+          'application'
+        end
+      end
+    end
     def pjax_request?
       env['HTTP_X_PJAX'].present?
     end
